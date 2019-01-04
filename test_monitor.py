@@ -1,6 +1,6 @@
 from pymongo import MongoClient
 
-from templateMonitor import TemplateComparator, Action
+from templateMonitor import TemplateComparator, CallbackAction
 
 
 def get_db():
@@ -11,7 +11,7 @@ def get_db():
 mydb = get_db()
 
 
-class TestAction(Action):
+class TestAction(CallbackAction):
     def callback(self, comparison_result):
         print("test print", comparison_result)
 

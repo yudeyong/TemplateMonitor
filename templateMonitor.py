@@ -6,9 +6,11 @@ from html_similarity import structural_similarity
 import datetime
 
 
-class Action(object):
+class CallbackAction(object):
     """
-    被调用触发器
+    被调用触发器，建议参照failcount=comparison_result['all']-comparison_result['success'],style_rate, struc_rate,3个数字综合考虑
+    或者通过get_similarity把后两个合成一个结果.
+    参考failcount, get_similarity根据失败数量，差异度触发不同事件
     """
     def callback(self, comparison_result):
         """
@@ -48,14 +50,19 @@ class TemplateComparator(object):
         return page, True
 
     @staticmethod
-    def compare(h1, h2):
-        # print("h1",h1)
-        # print("h2",h2)
-        style_rate = style_similarity(h1, h2)
-        struc_rate = structural_similarity(h1, h2)
+    def compare(html1, html2):
+        # print("html1",html1)
+        # print("html2",html2)
+        style_rate = style_similarity(html1, html2)
+        struc_rate = structural_similarity(html1, html2)
         return style_rate, struc_rate
 
     def get_similarity(self, style_rate, struc_rate):
+        """综合相似度，基于STYLE_WEIGHT
+        :param style_rate:
+        :param struc_rate:
+        :return:
+        """
         similarity = self.STYLE_WEIGHT*style_rate+(1-self.STYLE_WEIGHT)*struc_rate
         if TemplateComparator.debug:
             print(style_rate, struc_rate, similarity)
@@ -95,7 +102,7 @@ class TemplateComparator(object):
         dict = self.save_compare(base, page, style_rate, struc_rate)
         self.save_baseline(base, page, newpage)
         # print('callback ',self.callback, not self.callback)
-        if self.callback: # != None:
+        if self.callback:  # != None:
             self.callback.callback(dict)
 
     def compare_baseline(self, base, page):
@@ -158,4 +165,3 @@ class TemplateComparator(object):
                 if TemplateComparator.debug:
                     print("<", seed)
             base, bb = TemplateComparator.get_row(baseline)
-
